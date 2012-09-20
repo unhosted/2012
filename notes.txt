@@ -1,0 +1,270 @@
+# Unhosted Unconference
+Unhošt (Czech Republic), September 8–9, 2012
+http://unhosted.org
+
+
+
+## The first 731 days of unhosted
+Michiel de Jong, @michielbdejong
+http://unhosted.org/slides/michiel/unhost12.html
+
+how it started
+Chromebook is evil
+Uppsala → Pome → Diaspora e2ee → UJJP
+remoteStorage
+what we have
+unhosted web apps
+remote storage modules
+remote storage providers
+what we need
+modules
+apps
+(?)
+data in the accounts
+
+
+
+## Difficulties getting started with remoteStorage.js & writing the first app
+Nick Jennings, nkj, @slvrbckt
+
+Historically didn’t like web apps, hosted by big companies.
+Saw the talk in the list at CampusParty, liked it more the more I learnt about it
+Overlooked connect widget
+localStorage also new, no instructions for that at all atm (probs with clearing cache, looking at it, etc)
+cube is not obvious, should better indicate current status (connected, problem, etc.)
+Modules confusing, had to write own module, documentation on doing that not enough
+How to do extensions to existing modules? Wanted to create bookmarking app for videos, needs not only core bookmark attributes, but also video metadata etc
+Vidmarks app
+bookmarks, metadata, of Youtube videos
+https://github.com/silverbucket/vidmarks
+to be deployed on 5apps.com
+modules: videos, bookmarks, tags
+Mashups of modules? E.g. bookmarks + videos + tags. (tags + anything)
+What is the purpose of a module? Is there organized structure? Where does one end and begin? how do you enforce a data struct to ensure re-usability with other apps.
+Used the todo list app to start out, but it didn't answer advanced / midlevel questions.
+
+
+
+## App developer experience
+Martin Stadler, @xMartin
+
+Went to website, not clear what the current stable solutions are
+Went to IRC, said you should use the new stuff, because the website/info is outdated
+»I don’t care, I just want to start with a small thing to get it running.«
+»Where’s the stable version?«
+– Well, we don’t really support that anymore.
+»stable« is actually not
+you should use the new one, but that’s also not ready yet
+lots of innovation, but we should also have something stable
+a person or working group to support the stable stuff
+official material should clearly distinguish between ideas and products
+http://buddycloud.org developer wiki
+
+TODO
+https://github.com/unhosted/website/wiki/State-of-the-movement on website (Jan)
+pay attention to keep info up to date and stable: Niklas remoteStorage.js, Jan website
+improve remoteStoragejs.com: quick intro (Niklas, Martin, Basti, …?), better design (Jan)
+website: list of app devs and contributors, and what they are interested in, to contact
+monthly unhosted & remoteStorage meetup, starting in Berlin @ 5apps (Jan & Basti)
+also check out apps.berlin.js (~140 people)
+developer documentation: jsDoc (Niklas)
+get everyone on 0.7 this weekend?
+have short description for app devs: what’s 0.6.9, what’s 0.7.0?
+link to actual wild apps instead of example apps
+support 0.6.9 or 0.7.0? → follow-up session (Martin)
+
+
+
+## SURFnet storage-first demo
+Francois Kooman, @fkooman
+
+»app store« on your storage servers (essentially a better OAuth token display)
+list of Dutch universities
+creates OAuth consent automatically when you add an app
+everything is automatic, you don’t need to remember your user address
+manifest files
+module for apps, for moving to other storages
+maybe add francois' portal permissions api to the 0.8 spec?
+
+
+
+## Guidelines for apps & storages
+Jan-Christoph Borchardt, @jancborchardt
+
+https://github.com/unhosted/website/wiki/Guidelines - add more verbose explanation, also clearly say it's recommendations rather than rules
+
+Apps
+ideally do not use a server backend. While you can do it, don't (describe minutes.io situation)
+open-source your app and freely license it. While you don’t need to, that way everyone learns and can help.
+ideally use the connect widget, otherwise make sure to explain, and enable enter to log in
+use existing, generic categories as much as possible (documents, contacts, pictures, …), not one just for your app
+use AppCache for offline capability (easily done by deploying via 5apps)
+cache content with localStorage (0.6.9)
+use https for secure connections (startssl)
+general OAuth issue (on sign out, notify people that they are still signed in to their storage. Provide a link so they can sign out there also.)
+(polarizing recommendation) preferrably do not track usage. If you want to track usage, do it opt-in and anonymous – and then use a self-hosted solution (examples) rather than using a proprietary service (like Google Analytics)
+for live-collaboration, you can use Socket.io as temporary hub (link to Websocket World idea). friends#unhosted is looking to pass messages fully distributed. (issue link)
+make people aware of your app (even if it's only an experiment), post it to the mailing list, put it on webapp stores (for instance through 5apps.com)
+enable users to undo latest changes (like deletion) but don't bother about revision history, as this is planned to be in remoteStorage.js (issue link)
+don't ask for modules/data you don't really need, people will be more reluctant to use your app
+
+Storage provider
+give people easy addresses, like user@storage.com (rather than user-storage@storage.provider.com)
+prefill username in OAuth process
+persist tokens, an app should only need to be authorized once
+storage-first: use the token list as an app dashboard, with icons and links to the apps
+offer login + auth in one step to make the flow easier
+do not offer checkboxes for app permissions - either the app works or not
+
+
+remoteStorage.js support log in with provider domain
+Webfinger needed? discover friends without: http://useraddress.net
+
+
+
+## unhosted & FreedomBox
+Markus Sabadello, @peacekeeper
+
+http://freedomboxfoundation.org
+0.1 just released
+live demo!
+put between inet connection and computers at home (connect to fb wifi)
+Markus wants to demo some remotestorage implementation on it in a few weeks in Mountain View
+need a reverse proxy like pagekite
+maybe use unhosted.py or owncloud (debian package)
+applied for https://www.accessnow.org/prize - result expected sep 15
+
+
+
+## remoteStorage modules
+Niklas Cathor, nilclass
+
+extensibility
+undo, versions
+contacts, tags, bookmarks
+
+need to clean up module boilerplate, require basic functions from a base module (e.g. UUID)
+maybe add timestamps to all stored object by default
+maybe add "updatePublicListing" functionality to the base client (for maintaining a public index of published items of a category)
+[DONE] example server should have some output confirming the start after launching it
+have to build rs.js on every module change atm, maybe improve (by waching/auto-building with grunt or sth)?
+ran into "origin not allowed" – solution: got rid of local apache proxying, sudo node server on port 80  – if not existing, write proper instructions how to start local dev setup
+(the problem seems to be, that apache doesn't proxy OPTIONS by default)
+ran into format difference between local and remote change events
+events with origin=window have Objects, the same event with origin=remote have the JSON source in newValue/oldValue
+
+
+
+## HTML5 news
+Sebastian Kippe, binbasti, @skddc
+
+links
+
+
+
+## When labels for consumer info go wrong
+Hugo Roy, @hugoroyd
+https://speakerdeck.com/u/hugo/p/when-labels-go-wrong
+
+
+
+## Ideas & Products
+Michiel de Jong, @michielbdejong
+
+Ideas
+http://useraddress.net
+Webfinger-based
+»the polyglot approach to the federated social web«
+not a protocol, but a namespace in which everyone can operate
+user@host, domain, or some kind of identifier
+caches identities
+http://opentabs.net
+Bitcoins need to be produced, can be lost
+decentralized transactions
+beta test at Unhost via note app
+Sockethub
+real-time communication
+message publishing
+Websockets
+WebRTC?
+Apptorrent
+distribute apps as if it was Bittorrent
+peer-to-peer distribution of apps
+like a recommendation, quality rating
+
+Products
+actually none, see next session
+
+
+
+## State of the movement, usable products
+Jan-Christoph Borchardt, @jancborchardt
+https://github.com/unhosted/website/wiki/State-of-the-movement
+
+remoteStorage providers
+ownCloud providers http://owncube.com http://portknox.net
+developer focused http://5apps.com
+SURFnet, only for students
+Pagekite
+
+unhosted apps
+http://friendsunhosted.com
+http://sharedstuff.org
+http://jancborchardt.net/taskboard-lite
+http://docrastinate.com
+http://geal.github.com/Unpapered/
+https://github.com/vcuculo/ghost-unhosted-webrtc (uses WebRTC)
+
+Apps which need remoteStorage.js (see issues and feel free to help out)
+http://litewrite.net, https://github.com/litewrite/litewrite/issues/7 (new version uses Backbone.js)
+http://youtify.com, https://github.com/youtify/youtify/issues/160
+http://tantaman.github.com/Strut, https://github.com/tantaman/Strut/issues/8
+http://drichard.org/mindmaps, https://github.com/drichard/mindmaps/issues/18
+
+
+
+## Using remoteStorage not from a browser
+elf Pavlik, elf-pavlik
+
+export data from other web apps
+If this then that (IFTTT) recipe to put your stuff on remoteStorage http://radar.oreilly.com/2012/09/true-data-liberation.html
+
+
+## General discussion about user address and profile module
+
+problem that user address is not an email address, we have to communicate that
+cant use gravatar, mail from friendsunhosted dev
+use a profiles module for name, image, email, Shared Stuff already has that info
+modules for contacts and profile should be separate
+
+TODO website Jan
+roll back to Bootstrap version, fix layout issues
+improve docs, check out emberjs.com
+
+
+
+## Formats & distribution of unhosted web apps
+Sebastian Kippe, binbasti, @skddc
+
+Problem, storage provider window for chromeless app does not have an address bar, no way to verify its the actual app.
+proposal: Storage providers should show some information only the user knows on the authorization page, so in case the dialog is chromeless, the user can still verify easily that it's actually the real provider. (does this actually make sense?)
+
+
+
+
+
+
+MORE SESSIONS
+
+quick app example with both 0.6.9 & 0.7.0 to improve documentation
+crowdfunding the crowd
+nomadic hacker lifestyle
+Terms of Service; Didn’t Read http://tos-dr.info
+how to proceed
+crowdfunding http://titanpad.com/tosdr-crowdfunding
+DO THE VIDEO
+remoteStorage-backbone, Litewrite (Michiel, Jan)
+module versioning
+sync
+e.V. meeting
+
